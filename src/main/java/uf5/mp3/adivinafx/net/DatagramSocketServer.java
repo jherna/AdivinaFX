@@ -1,8 +1,10 @@
 package uf5.mp3.adivinafx.net;
 
+import uf5.mp3.adivinafx.model.EstatJoc;
+import uf5.mp3.adivinafx.model.Jugada;
 import uf5.mp3.adivinafx.model.SecretNum;
 
-import java.io.IOException;
+import java.io.*;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -19,6 +21,7 @@ public class DatagramSocketServer {
     private SecretNum ns;
     private int fi;
     private boolean acabat;
+    public EstatJoc estatJoc;
 
     //Instàciar el socket
     public void init(int port) throws SocketException {
@@ -27,6 +30,7 @@ public class DatagramSocketServer {
         acabat = false;
         fi=-1;
         System.out.printf("Servidor obert pel port %d%n",port);
+        estatJoc = new EstatJoc();
     }
 
     public void runServer() throws IOException {
@@ -49,12 +53,33 @@ public class DatagramSocketServer {
 
     //El server retorna al client el mateix missatge que li arriba però en majúscules
     public byte[] processData(byte[] data, int lenght) {
-        String nombre = new String(data,0,lenght);
-        System.out.println("rebut->"+nombre);
-        fi = ns.comprova(Integer.parseInt(nombre));
-        if(fi==0) acabat=true;
-        byte[] resposta = ns.comprova(nombre).getBytes();
-        return resposta;
+        Jugada jugada;
+        ByteArrayInputStream is = new ByteArrayInputStream(data);
+        try {
+            ObjectInputStream ois = new ObjectInputStream(is);
+            jugada = (Jugada) ois.readObject();
+            System.out.println(jugada);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        fi = ns.comprova(jugada.getTirada());
+        if(fi==0) {
+            acabat=true;
+
+        }
+        estatJoc.setResponse(ns.comprova(String.valueOf(jugada.getTirada())));
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        ObjectOutputStream oos = null;
+        try {
+            oos = new ObjectOutputStream(os);
+            oos.writeObject(estatJoc);
+            oos.flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return os.toByteArray();
     }
 
 

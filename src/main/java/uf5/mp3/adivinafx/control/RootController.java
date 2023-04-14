@@ -13,10 +13,12 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.util.Pair;
 import uf5.mp3.adivinafx.AdivinaApp;
+import uf5.mp3.adivinafx.model.EstatJoc;
+import uf5.mp3.adivinafx.model.Jugada;
 import uf5.mp3.adivinafx.net.DatagramSocketClient;
 import uf5.mp3.adivinafx.net.DatagramSocketServer;
 
-import java.io.IOException;
+import java.io.*;
 import java.net.SocketException;
 import java.net.URL;
 import java.net.UnknownHostException;
@@ -36,17 +38,42 @@ public class RootController implements Initializable {
     Circle circleClient;
 
     String resp = "";
+    String nom;
+
 
     DatagramSocketClient client = new DatagramSocketClient() {
         @Override
         public void getResponse(byte[] data, int length) {
-            resp = new String(data,0,length);
-            lblResponse.setText(resp);
+            ByteArrayInputStream is = new ByteArrayInputStream(data);
+            EstatJoc estatJoc = null;
+            try {
+                ObjectInputStream ois = new ObjectInputStream(is);
+                estatJoc = (EstatJoc) ois.readObject();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+
+            lblResponse.setText(estatJoc.getResponse());
         }
 
         @Override
         public byte[] getRequest() {
-            return txtNum.getText().getBytes();
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            ObjectOutputStream oos = null;
+            Jugada jugada = new Jugada();
+            jugada.setTirada(Integer.parseInt(txtNum.getText()));
+            jugada.setNom(nom);
+            try {
+                oos = new ObjectOutputStream(os);
+                oos.writeObject(jugada);
+                oos.flush();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            //return txtNum.getText().getBytes();
+            return os.toByteArray();
         }
 
         @Override
@@ -83,11 +110,16 @@ public class RootController implements Initializable {
         txtIp.setPromptText("IP");
         TextField txtPort = new TextField();
         txtPort.setPromptText("Port");
+        TextField txtNom = new TextField();
+        txtNom.setPromptText("Nom");
+
 
         gridPane.add(new Label("IP:"), 0, 0);
         gridPane.add(txtIp, 1, 0);
         gridPane.add(new Label("Port:"), 0, 1);
         gridPane.add(txtPort, 1, 1);
+        gridPane.add(new Label("Nom:"), 0, 2);
+        gridPane.add(txtNom, 1, 2);
 
         dialog.getDialogPane().setContent(gridPane);
 
@@ -95,6 +127,7 @@ public class RootController implements Initializable {
 
         dialog.setResultConverter(dButton -> {
             if(dButton == conButton) {
+                nom = txtNom.getText();
                 return new Pair<>(txtIp.getText(),Integer.parseInt(txtPort.getText()));
             }
             return null;

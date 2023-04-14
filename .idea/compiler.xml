@@ -9,8 +9,5 @@
         <module name="AdivinaFX" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="AdivinaFX" target="17" />
-    </bytecodeTargetLevel>
   </component>
 </project>
