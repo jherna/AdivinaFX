@@ -10,7 +10,6 @@ public abstract class DatagramSocketClient {
     int serverPort;
     DatagramSocket socket;
     Scanner sc;
-    String nom;
 
     public DatagramSocketClient() {
         sc = new Scanner(System.in);

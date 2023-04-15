@@ -9,6 +9,7 @@ import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.util.Pair;
@@ -36,26 +37,34 @@ public class RootController implements Initializable {
     Circle circleServer;
     @FXML
     Circle circleClient;
+    @FXML
+    VBox vBoxLeft;
+    @FXML
+    VBox vBoxRight;
+    @FXML
+    Label lblEstatJoc;
+
 
     String resp = "";
     String nom;
+    EstatJoc estatJoc = null;
 
 
     DatagramSocketClient client = new DatagramSocketClient() {
         @Override
         public void getResponse(byte[] data, int length) {
             ByteArrayInputStream is = new ByteArrayInputStream(data);
-            EstatJoc estatJoc = null;
             try {
                 ObjectInputStream ois = new ObjectInputStream(is);
                 estatJoc = (EstatJoc) ois.readObject();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            } catch (ClassNotFoundException e) {
+            } catch (IOException | ClassNotFoundException e) {
                 throw new RuntimeException(e);
             }
 
             lblResponse.setText(estatJoc.getResponse());
+            StringBuilder stringEstat = new StringBuilder();
+            estatJoc.jugadors.forEach((j,i)->stringEstat.append(j + ":" + i + "\n"));
+            lblEstatJoc.setText(stringEstat.toString());
         }
 
         @Override
@@ -72,7 +81,6 @@ public class RootController implements Initializable {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            //return txtNum.getText().getBytes();
             return os.toByteArray();
         }
 
@@ -87,6 +95,9 @@ public class RootController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        vBoxLeft.setMaxWidth((double) AdivinaApp.MAIN_WINDOW_WIDTH / 2);
+        vBoxRight.setMaxWidth((double) AdivinaApp.MAIN_WINDOW_WIDTH / 2);
+
         lblResponse.setText("Welcome to Adivina!");
         //TODO Verificar si estàs o no connectat abans d'enviar un num
         //TODO Tractar els errors que puguin donar les connexions al servidor i la rx del client
@@ -141,9 +152,7 @@ public class RootController implements Initializable {
                 Thread.sleep(500);
                 circleClient.setFill(Color.BLUE);
                 lblResponse.setText("connectat. Comença!");
-            } catch (SocketException | UnknownHostException e) {
-                e.printStackTrace();
-            } catch (InterruptedException e) {
+            } catch (SocketException | UnknownHostException | InterruptedException e) {
                 e.printStackTrace();
             }
         }
@@ -151,8 +160,6 @@ public class RootController implements Initializable {
 
     @FXML
     public void clickSubmit(MouseEvent mouseEvent) {
-
-
         if(!txtNum.getText().equals("") && !resp.equals("Correcte")) {
             try {
                 client.runClient();
@@ -186,8 +193,6 @@ public class RootController implements Initializable {
                 try {
                     server.init(Integer.parseInt(result.get()));
                     server.runServer();
-                } catch (SocketException e) {
-                    e.printStackTrace();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

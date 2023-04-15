@@ -58,6 +58,7 @@ public class DatagramSocketServer {
         try {
             ObjectInputStream ois = new ObjectInputStream(is);
             jugada = (Jugada) ois.readObject();
+            updateEstatJoc(jugada);
             System.out.println(jugada);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -67,7 +68,6 @@ public class DatagramSocketServer {
         fi = ns.comprova(jugada.getTirada());
         if(fi==0) {
             acabat=true;
-
         }
         estatJoc.setResponse(ns.comprova(String.valueOf(jugada.getTirada())));
         ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -82,7 +82,13 @@ public class DatagramSocketServer {
         return os.toByteArray();
     }
 
-
+    private void updateEstatJoc(Jugada jugada) {
+        if(estatJoc.jugadors.containsKey(jugada.getNom())) { //Si existeix el jugador
+            estatJoc.jugadors.put(jugada.getNom(),estatJoc.jugadors.get(jugada.getNom())+1);
+        } else {
+            estatJoc.jugadors.put(jugada.getNom(),1);
+        }
+    }
 
 
 }
