@@ -7,6 +7,10 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
+/**
+ * A la branca master el joc és només amb integers i a la branca objectes amb Jugada i EstatJoc
+ */
+
 public class AdivinaApp extends Application {
     public static final int MAIN_WINDOW_WIDTH = 320;
     public static final int MAIN_WINDOW_HEIGHT = 240;
