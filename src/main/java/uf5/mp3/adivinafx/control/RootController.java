@@ -101,6 +101,7 @@ public class RootController implements Initializable {
         lblResponse.setText("Welcome to Adivina!");
         //TODO Verificar si estàs o no connectat abans d'enviar un num
         //TODO Tractar els errors que puguin donar les connexions al servidor i la rx del client
+        //TODO Posar un sistema de torns
     }
 
     @FXML
