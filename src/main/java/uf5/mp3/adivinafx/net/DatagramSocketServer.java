@@ -9,7 +9,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
-import java.nio.ByteBuffer;
 
 /**
  * Created by jordi on 26/02/17.
@@ -29,7 +28,7 @@ public class DatagramSocketServer {
         ns = new SecretNum(100);
         acabat = false;
         fi=-1;
-        System.out.printf("Servidor obert pel port %d%n",port);
+        System.out.printf("Servidor obert pel port %d %d%n",port,ns.getNum());
         estatJoc = new EstatJoc();
     }
 
@@ -59,17 +58,15 @@ public class DatagramSocketServer {
             ObjectInputStream ois = new ObjectInputStream(is);
             jugada = (Jugada) ois.readObject();
             updateEstatJoc(jugada);
-            System.out.println(jugada);
+            //System.out.println(jugada + "torn:" + estatJoc.getTurn());
         } catch (IOException e) {
             throw new RuntimeException(e);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
-        fi = ns.comprova(jugada.getTirada());
-        if(fi==0) {
-            acabat=true;
-        }
-        estatJoc.setResponse(ns.comprova(String.valueOf(jugada.getTirada())));
+
+
+
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         ObjectOutputStream oos = null;
         try {
@@ -83,11 +80,26 @@ public class DatagramSocketServer {
     }
 
     private void updateEstatJoc(Jugada jugada) {
-        if(estatJoc.jugadors.containsKey(jugada.getNom())) { //Si existeix el jugador
-            estatJoc.jugadors.put(jugada.getNom(),estatJoc.jugadors.get(jugada.getNom())+1);
+        if(estatJoc.getTurn() == null) {
+            estatJoc.setTurn(jugada.getNom());
+            estatJoc.jugadors.put(jugada.getNom(), 0);
+            System.out.println("Juagdor afegit torn null: " + jugada.getNom());
         } else {
-            estatJoc.jugadors.put(jugada.getNom(),1);
+            if(jugada.getTirada() == -2) {
+                estatJoc.jugadors.put(jugada.getNom(), 0);
+                System.out.println("Juagdor afegit: " + jugada.getNom());
+            }
+            if (jugada.getTirada() >= 0) { //si la tirada no és de control s'actualitza
+               estatJoc.jugadors.put(jugada.getNom(), estatJoc.jugadors.get(jugada.getNom()) + 1);
+               fi = ns.comprova(jugada.getTirada());
+               estatJoc.setResponse(ns.comprova(String.valueOf(jugada.getTirada())));
+               if(fi == 0) acabat=true;
+               estatJoc.nextTurn();
+               System.out.println("Torn actualitzat: " + estatJoc.getTurn());
+            }
+            if(jugada.getTirada() == -1) System.out.println("Tirada de control " + jugada.getNom());
         }
+
     }
 
 

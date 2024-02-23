@@ -6,6 +6,7 @@
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
@@ -35,6 +36,7 @@
             <VBox fx:id="vBoxRight">
                <children>
                   <Label fx:id="lblEstatJoc" text="-------" />
+                  <ProgressIndicator fx:id="ctrlUpdate" onMouseClicked="#clickUpdate" progress="0.0" />
                </children>
                <padding>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />

@@ -1,5 +1,6 @@
 package uf5.mp3.adivinafx.control;
 
+import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -48,6 +49,7 @@ public class RootController implements Initializable {
     String resp = "";
     String nom;
     EstatJoc estatJoc = null;
+    private Jugada jugada;;
 
 
     DatagramSocketClient client = new DatagramSocketClient() {
@@ -65,15 +67,18 @@ public class RootController implements Initializable {
             StringBuilder stringEstat = new StringBuilder();
             estatJoc.jugadors.forEach((j,i)->stringEstat.append(j + ":" + i + "\n"));
             lblEstatJoc.setText(stringEstat.toString());
+
         }
 
         @Override
         public byte[] getRequest() {
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             ObjectOutputStream oos = null;
-            Jugada jugada = new Jugada();
-            jugada.setTirada(Integer.parseInt(txtNum.getText()));
-            jugada.setNom(nom);
+            //jugada = new Jugada();
+            if(estatJoc == null) {
+                jugada.setTirada(-2); //tirada d'inicialització
+            }
+
             try {
                 oos = new ObjectOutputStream(os);
                 oos.writeObject(jugada);
@@ -102,6 +107,20 @@ public class RootController implements Initializable {
         //TODO Verificar si estàs o no connectat abans d'enviar un num
         //TODO Tractar els errors que puguin donar les connexions al servidor i la rx del client
         //TODO Posar un sistema de torns
+        jugada = new Jugada();;
+    }
+
+    private void enableControlsTurn() {
+        if(estatJoc != null) {
+            if(estatJoc.getTurn().equals(nom)) {
+                btnSubmit.setDisable(false);
+                txtNum.setDisable(false);
+            } else {
+                btnSubmit.setDisable(true);
+                txtNum.setDisable(true);
+            }
+            txtNum.setText("");
+        }
     }
 
     @FXML
@@ -140,6 +159,7 @@ public class RootController implements Initializable {
         dialog.setResultConverter(dButton -> {
             if(dButton == conButton) {
                 nom = txtNom.getText();
+                jugada.setNom(nom);
                 return new Pair<>(txtIp.getText(),Integer.parseInt(txtPort.getText()));
             }
             return null;
@@ -150,23 +170,28 @@ public class RootController implements Initializable {
         if(result.isPresent()) {
             try {
                 client.init(result.get().getKey(), result.get().getValue());
+                client.runClient();
                 Thread.sleep(500);
                 circleClient.setFill(Color.BLUE);
-                lblResponse.setText("connectat. Comença!");
+                lblResponse.setText("Connectat, comença!");
+
             } catch (SocketException | UnknownHostException | InterruptedException e) {
                 e.printStackTrace();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
         }
     }
 
     @FXML
     public void clickSubmit(MouseEvent mouseEvent) {
-        if(!txtNum.getText().equals("") && !resp.equals("Correcte")) {
+        if(!txtNum.getText().isEmpty() && !resp.equals("Correcte")) {
             try {
+                jugada.setTirada(Integer.parseInt(txtNum.getText()));
                 client.runClient();
-                txtNum.setText("");
+                enableControlsTurn();
             } catch (IOException e) {
-                e.printStackTrace();
+               e.printStackTrace();
             }
         }
     }
@@ -201,5 +226,15 @@ public class RootController implements Initializable {
             thServer.start();
         }
 
+    }
+
+    public void clickUpdate(MouseEvent mouseEvent) {
+        try {
+            jugada.setTirada(-1);
+            client.runClient();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        enableControlsTurn();
     }
 }
