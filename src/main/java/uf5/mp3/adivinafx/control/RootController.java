@@ -108,6 +108,7 @@ public class RootController implements Initializable {
         //TODO Tractar els errors que puguin donar les connexions al servidor i la rx del client
         //TODO Automatitzar el sistea de torns (ara és manual i s'ha d'acualitzar fent click al botó update)
         jugada = new Jugada();;
+
     }
 
     private void enableControlsTurn() {
@@ -174,12 +175,16 @@ public class RootController implements Initializable {
                 Thread.sleep(500);
                 circleClient.setFill(Color.BLUE);
                 lblResponse.setText("Connectat, comença!");
+                if(!estatJoc.getTurn().equals(nom)) {
+                    timer.start();
+                }
 
             } catch (SocketException | UnknownHostException | InterruptedException e) {
                 e.printStackTrace();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
+
         }
     }
 
@@ -190,6 +195,8 @@ public class RootController implements Initializable {
                 jugada.setTirada(Integer.parseInt(txtNum.getText()));
                 client.runClient();
                 enableControlsTurn();
+                timer.start();
+
             } catch (IOException e) {
                e.printStackTrace();
             }
@@ -226,6 +233,7 @@ public class RootController implements Initializable {
             thServer.start();
         }
 
+
     }
 
     public void clickUpdate(MouseEvent mouseEvent) {
@@ -237,4 +245,20 @@ public class RootController implements Initializable {
         }
         enableControlsTurn();
     }
+
+    AnimationTimer timer = new AnimationTimer() {
+        @Override
+        public void handle(long l) {
+            try {
+                jugada.setTirada(-1);
+                client.runClient();
+                if(estatJoc.getTurn().equals(nom)) {
+                    stop();
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            enableControlsTurn();
+        }
+    };
 }
