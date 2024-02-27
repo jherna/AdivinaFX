@@ -63,7 +63,7 @@ public class RootController implements Initializable {
                 throw new RuntimeException(e);
             }
 
-            lblResponse.setText(estatJoc.getResponse());
+           // lblResponse.setText(estatJoc.getResponse());
             StringBuilder stringEstat = new StringBuilder();
             estatJoc.jugadors.forEach((j,i)->stringEstat.append(j + ":" + i + "\n"));
             lblEstatJoc.setText(stringEstat.toString());
@@ -96,8 +96,6 @@ public class RootController implements Initializable {
     };
 
 
-
-
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         vBoxLeft.setMaxWidth((double) AdivinaApp.MAIN_WINDOW_WIDTH / 2);
@@ -106,7 +104,7 @@ public class RootController implements Initializable {
         lblResponse.setText("Welcome to Adivina!");
         //TODO Verificar si estàs o no connectat abans d'enviar un num
         //TODO Tractar els errors que puguin donar les connexions al servidor i la rx del client
-        //TODO Automatitzar el sistea de torns (ara és manual i s'ha d'acualitzar fent click al botó update)
+        //TODO Implementar la finalització del joc quan algun jugador guanya
         jugada = new Jugada();;
 
     }
@@ -195,6 +193,7 @@ public class RootController implements Initializable {
                 jugada.setTirada(Integer.parseInt(txtNum.getText()));
                 client.runClient();
                 enableControlsTurn();
+                lblResponse.setText(estatJoc.getResponse());
                 timer.start();
 
             } catch (IOException e) {
