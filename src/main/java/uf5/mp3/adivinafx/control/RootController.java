@@ -236,15 +236,6 @@ public class RootController implements Initializable {
 
     }
 
-    public void clickUpdate(MouseEvent mouseEvent) {
-        try {
-            jugada.setTirada(-1);
-            client.runClient();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        enableControlsTurn();
-    }
 
     AnimationTimer timer = new AnimationTimer() {
         @Override

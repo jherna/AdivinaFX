@@ -33,14 +33,12 @@
                   </Label>
                </children>
             </VBox>
-            <VBox fx:id="vBoxRight">
-               <children>
-                  <Label fx:id="lblEstatJoc" text="-------" />
-                  <ProgressIndicator fx:id="ctrlUpdate" onMouseClicked="#clickUpdate" progress="0.0" />
-               </children>
-               <padding>
-                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-               </padding></VBox>
+             <VBox fx:id="vBoxRight">
+                 <padding>
+                     <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                 </padding>
+                 <Label fx:id="lblEstatJoc" text="-------"/>
+             </VBox>
          </children>
       </HBox>
       <MenuBar AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
